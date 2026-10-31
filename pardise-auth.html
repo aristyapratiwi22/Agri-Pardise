@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PARDISE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<style>
+:root{--cream:#F6F1E4;--white:#fff;--sage:#A9B89A;--sage-l:#E4EADC;--forest:#2F4A35;--forest-d:#1F3325;--ink:#22301f;--mut:#6b7a66;--err:#a33b2c;--line:#d9dfcf;
+--serif:'Fraunces',Georgia,serif;--sans:'Instrument Sans',system-ui,sans-serif}
+*{box-sizing:border-box}html,body{margin:0}
+body{font-family:var(--sans);background:var(--cream);color:var(--ink);min-height:100vh;line-height:1.5}
+h1,h2,h3{font-family:var(--serif);font-weight:700;margin:0;color:var(--forest)}
+.hidden{display:none!important}
+.auth{min-height:100vh;display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr)}
+.side{background:var(--forest);color:var(--cream);padding:48px;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden}
+.side h2{color:var(--cream);font-size:2.4rem;line-height:1.15;max-width:14ch}
+.side p{color:var(--sage);max-width:34ch}
+.side svg.bg{position:absolute;right:-60px;bottom:-60px;width:340px;opacity:.18}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--serif);font-weight:700;font-size:1.35rem;letter-spacing:.04em}
+.main{display:flex;align-items:center;justify-content:center;padding:32px 20px}
+.card{background:var(--white);border:1px solid var(--line);border-radius:18px;padding:36px;width:100%;max-width:460px}
+.card h1{font-size:1.8rem;margin:14px 0 4px}.sub{color:var(--mut);margin:0 0 22px}
+label{display:block;font-weight:500;font-size:.9rem;margin:14px 0 5px}label small{color:var(--mut);font-weight:400}
+input[type=text],input[type=email],input[type=password],input[type=tel]{width:100%;padding:11px 13px;border:1.5px solid var(--line);border-radius:10px;background:var(--cream);font:inherit;color:var(--ink)}
+input:focus,select:focus,button:focus-visible,a:focus-visible{outline:2px solid var(--forest);outline-offset:1px}
+input.bad{border-color:var(--err)}.fe{color:var(--err);font-size:.82rem;min-height:1em;margin-top:3px}
+.pw{position:relative}.pw button{position:absolute;right:6px;top:50%;transform:translateY(-50%);background:none;border:0;color:var(--forest);font-weight:600;font-size:.82rem;cursor:pointer;padding:6px 8px}
+.row{display:flex;justify-content:space-between;align-items:center;margin:14px 0 18px;font-size:.9rem}.row label{margin:0;display:flex;gap:7px;align-items:center;font-weight:400}
+.btn{width:100%;padding:12px;border:0;border-radius:10px;background:var(--forest);color:var(--cream);font:600 1rem var(--sans);cursor:pointer}
+.btn:hover{background:var(--forest-d)}.btn:disabled{opacity:.6;cursor:wait}
+.btn.sm{width:auto;padding:9px 18px}.btn.ghost{background:var(--sage-l);color:var(--forest)}
+a.lnk,.lnk{color:var(--forest);font-weight:600;text-decoration:underline;cursor:pointer;background:none;border:0;font:inherit;padding:0}
+.alt{text-align:center;margin-top:18px;font-size:.92rem;color:var(--mut)}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}
+#toast{position:fixed;top:18px;left:50%;transform:translateX(-50%);padding:12px 20px;border-radius:10px;color:#fff;font-weight:500;z-index:9;max-width:90vw;box-shadow:0 6px 20px rgba(0,0,0,.18)}
+#toast.ok{background:var(--forest)}#toast.err{background:var(--err)}
+.banner{background:#fff3cd;color:#6b5200;padding:10px 16px;font-size:.88rem;text-align:center}
+/* app */
+.app{display:grid;grid-template-columns:240px minmax(0,1fr);min-height:100vh}
+.nav{background:var(--forest);color:var(--cream);padding:24px 16px;display:flex;flex-direction:column;gap:4px}
+.nav .brand{padding:0 10px 20px}.nav button{background:none;border:0;color:var(--sage-l);text-align:left;padding:10px 12px;border-radius:9px;font:500 .95rem var(--sans);cursor:pointer}
+.nav button:hover,.nav button.on{background:rgba(255,255,255,.12);color:#fff}.nav hr{border:0;border-top:1px solid rgba(255,255,255,.15);width:100%;margin:10px 0}
+.nav .sp{flex:1}
+.page{padding:32px clamp(18px,4vw,48px);max-width:980px}
+.top{display:flex;align-items:center;gap:12px;margin-bottom:24px}.top .who{margin-left:auto;text-align:right;font-size:.9rem}
+.av{width:44px;height:44px;border-radius:50%;background:var(--sage);color:var(--forest);display:grid;place-items:center;font-weight:700;overflow:hidden;flex:none}
+.av img{width:100%;height:100%;object-fit:cover}.av.lg{width:88px;height:88px;font-size:1.8rem}
+.badge{display:inline-block;padding:2px 10px;border-radius:99px;background:var(--sage-l);color:var(--forest);font-size:.78rem;font-weight:600}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px;margin-top:20px}
+.mod{background:var(--white);border:1px solid var(--line);border-radius:14px;padding:18px}.mod h3{font-size:1.05rem}.mod p{margin:6px 0 0;color:var(--mut);font-size:.88rem}
+.panel{background:var(--white);border:1px solid var(--line);border-radius:16px;padding:26px;margin-bottom:20px}
+table{width:100%;border-collapse:collapse;font-size:.9rem}th,td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line)}th{color:var(--mut);font-weight:500}
+.tw{overflow-x:auto}select{padding:6px 8px;border:1.5px solid var(--line);border-radius:8px;background:var(--cream);font:inherit}
+@media(max-width:820px){.auth{grid-template-columns:1fr}.side{display:none}.app{grid-template-columns:1fr}.nav{flex-direction:row;flex-wrap:wrap;padding:12px}.nav .brand{width:100%;padding:0 0 6px}.nav hr,.nav .sp{display:none}.g2{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div id="cfgwarn" class="banner hidden">Isi <b>SUPABASE_URL</b> dan <b>SUPABASE_ANON_KEY</b> di bagian script agar login berfungsi.</div>
+<div id="toast" class="hidden" role="status"></div>
+
+<!-- ============ AUTH ============ -->
+<div id="auth" class="auth hidden">
+  <aside class="side">
+    <div class="brand"><svg width="34" height="34" viewBox="0 0 40 40"><circle cx="20" cy="20" r="19" fill="#E4EADC"/><path d="M20 33V17M20 24c-7 0-9-6-9-10 7 0 9 4 9 10zm0-4c5 0 8-4 8-8-6 0-8 3-8 8z" fill="none" stroke="#2F4A35" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>PARDISE</div>
+    <div><h2>Kelola lahan dari tanam sampai panen.</h2><p>Lahan, siklus produksi, RAB, hama, dan laporan Anda tersimpan rapi dalam satu akun.</p></div>
+    <svg class="bg" viewBox="0 0 40 40"><path d="M20 36V14M20 26C9 26 6 17 6 8c11 0 14 8 14 18zm0-6c8 0 13-6 13-14-10 0-13 6-13 14z" fill="none" stroke="#E4EADC" stroke-width="1.6"/></svg>
+  </aside>
+  <main class="main">
+    <!-- Login -->
+    <form class="card" id="f-login" novalidate>
+      <svg width="46" height="46" viewBox="0 0 40 40"><circle cx="20" cy="20" r="19" fill="#2F4A35"/><path d="M20 33V17M20 24c-7 0-9-6-9-10 7 0 9 4 9 10zm0-4c5 0 8-4 8-8-6 0-8 3-8 8z" fill="none" stroke="#F6F1E4" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <h1>Welcome Back to PARDISE</h1><p class="sub">Masuk untuk melanjutkan ke dashboard Anda.</p>
+      <label for="l-id">Email atau username</label><input id="l-id" type="text" autocomplete="username"><div class="fe" id="l-id-e"></div>
+      <label for="l-pw">Password</label>
+      <div class="pw"><input id="l-pw" type="password" autocomplete="current-password"><button type="button" data-eye="l-pw">Tampilkan</button></div><div class="fe" id="l-pw-e"></div>
+      <div class="row"><label><input type="checkbox" id="l-rm" checked> Remember Me</label><a class="lnk" data-go="forgot">Forgot Password?</a></div>
+      <button class="btn" id="l-btn">Login</button>
+      <p class="alt">Belum punya akun? <a class="lnk" data-go="register">Daftar sekarang</a></p>
+    </form>
+    <!-- Register -->
+    <form class="card hidden" id="f-reg" novalidate>
+      <h1>Buat akun PARDISE</h1><p class="sub">Isi data berikut untuk mulai mengelola usaha tani Anda.</p>
+      <label for="r-name">Nama lengkap</label><input id="r-name" type="text" autocomplete="name"><div class="fe" id="r-name-e"></div>
+      <div class="g2"><div><label for="r-email">Email</label><input id="r-email" type="email" autocomplete="email"><div class="fe" id="r-email-e"></div></div>
+      <div><label for="r-user">Username</label><input id="r-user" type="text" autocomplete="username"><div class="fe" id="r-user-e"></div></div></div>
+      <div class="g2"><div><label for="r-pw">Password</label><div class="pw"><input id="r-pw" type="password" autocomplete="new-password"><button type="button" data-eye="r-pw">Tampilkan</button></div><div class="fe" id="r-pw-e"></div></div>
+      <div><label for="r-pw2">Konfirmasi password</label><div class="pw"><input id="r-pw2" type="password" autocomplete="new-password"><button type="button" data-eye="r-pw2">Tampilkan</button></div><div class="fe" id="r-pw2-e"></div></div></div>
+      <label for="r-farm">Nama usaha tani <small>(opsional)</small></label><input id="r-farm" type="text">
+      <label for="r-loc">Lokasi pertanian</label><input id="r-loc" type="text" placeholder="Kecamatan, Kabupaten, Provinsi"><div class="fe" id="r-loc-e"></div>
+      <button class="btn" id="r-btn" style="margin-top:12px">Daftar</button>
+      <p class="alt">Sudah punya akun? <a class="lnk" data-go="login">Login</a></p>
+    </form>
+    <!-- Forgot -->
+    <form class="card hidden" id="f-forgot" novalidate>
+      <h1>Reset password</h1><p class="sub">Kami kirim tautan pengaturan ulang ke email Anda.</p>
+      <label for="f-email">Email</label><input id="f-email" type="email"><div class="fe" id="f-email-e"></div>
+      <button class="btn" id="f-btn" style="margin-top:16px">Kirim tautan reset</button>
+      <p class="alt"><a class="lnk" data-go="login">Kembali ke login</a></p>
+    </form>
+    <!-- New password after recovery link -->
+    <form class="card hidden" id="f-reset" novalidate>
+      <h1>Buat password baru</h1><p class="sub">Minimal 8 karakter, berisi huruf dan angka.</p>
+      <label for="n-pw">Password baru</label><div class="pw"><input id="n-pw" type="password" autocomplete="new-password"><button type="button" data-eye="n-pw">Tampilkan</button></div>
+      <label for="n-pw2">Konfirmasi password</label><input id="n-pw2" type="password" autocomplete="new-password"><div class="fe" id="n-e"></div>
+      <button class="btn" id="n-btn" style="margin-top:16px">Simpan password</button>
+    </form>
+  </main>
+</div>
+
+<!-- ============ APP ============ -->
+<div id="app" class="app hidden">
+  <nav class="nav" id="nav">
+    <div class="brand"><svg width="28" height="28" viewBox="0 0 40 40"><circle cx="20" cy="20" r="19" fill="#E4EADC"/><path d="M20 33V17M20 24c-7 0-9-6-9-10 7 0 9 4 9 10zm0-4c5 0 8-4 8-8-6 0-8 3-8 8z" fill="none" stroke="#2F4A35" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>PARDISE</div>
+    <button data-page="dash" class="on">Dashboard</button>
+    <button data-page="profile">Profil saya</button>
+    <span id="admin-nav" class="hidden"><hr><button data-page="users" style="width:100%">Kelola akun</button></span>
+    <span class="sp"></span><hr><button id="logout">Logout</button>
+  </nav>
+  <section class="page">
+    <div class="top"><div class="av" id="top-av"></div><div class="who"><b id="top-name"></b><br><span class="badge" id="top-role"></span></div></div>
+    <div id="p-dash">
+      <h1 id="hello"></h1><p class="sub">Semua perubahan Anda tersimpan di database dan akan tersedia saat Anda login kembali.</p>
+      <div class="grid" id="mods"></div>
+    </div>
+    <div id="p-profile" class="hidden">
+      <h1>Profil saya</h1><p class="sub">Perbarui data akun dan usaha tani Anda.</p>
+      <form class="panel" id="f-prof" novalidate>
+        <div style="display:flex;align-items:center;gap:16px;margin-bottom:6px"><div class="av lg" id="p-av"></div>
+          <div><button type="button" class="btn sm ghost" id="av-btn">Ganti foto</button><input type="file" id="av-file" accept="image/png,image/jpeg,image/webp" class="hidden"><div class="fe" id="av-e" style="color:var(--mut)">JPG, PNG, atau WebP, maksimal 2 MB.</div></div></div>
+        <div class="g2"><div><label for="p-name">Nama lengkap</label><input id="p-name" type="text"></div><div><label for="p-user">Username</label><input id="p-user" type="text"></div>
+        <div><label for="p-email">Email</label><input id="p-email" type="email"></div><div><label for="p-phone">Nomor telepon</label><input id="p-phone" type="tel"></div>
+        <div><label for="p-farm">Nama usaha pertanian</label><input id="p-farm" type="text"></div><div><label for="p-loc">Lokasi pertanian</label><input id="p-loc" type="text"></div></div>
+        <div class="fe" id="p-e"></div><button class="btn sm" id="p-btn" style="margin-top:14px">Simpan perubahan</button>
+      </form>
+      <form class="panel" id="f-pw" novalidate>
+        <h3>Ubah password</h3>
+        <div class="g2"><div><label for="c-pw">Password baru</label><div class="pw"><input id="c-pw" type="password" autocomplete="new-password"><button type="button" data-eye="c-pw">Tampilkan</button></div></div>
+        <div><label for="c-pw2">Konfirmasi password</label><input id="c-pw2" type="password" autocomplete="new-password"></div></div>
+        <div class="fe" id="c-e"></div><button class="btn sm" id="c-btn" style="margin-top:14px">Ubah password</button>
+      </form>
+    </div>
+    <div id="p-users" class="hidden">
+      <h1>Kelola akun</h1><p class="sub">Atur peran dan status akses setiap pengguna.</p>
+      <div class="panel tw"><table><thead><tr><th>Nama</th><th>Username</th><th>Lokasi</th><th>Peran</th><th>Status</th></tr></thead><tbody id="u-body"></tbody></table></div>
+    </div>
+  </section>
+</div>
+
+<script>
+// ====== ISI DENGAN DATA PROYEK SUPABASE ANDA (Project Settings > API) ======
+const SUPABASE_URL = 'https://YOUR-PROJECT.supabase.co';
+const SUPABASE_ANON_KEY = 'YOUR-ANON-KEY';
+// =========================================================================
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+if (SUPABASE_URL.includes('YOUR-PROJECT')) $('cfgwarn').classList.remove('hidden');
+
+// Remember Me: sesi disimpan di localStorage (diingat) atau sessionStorage (hilang saat tab ditutup)
+const store = {
+  getItem: k => localStorage.getItem(k) ?? sessionStorage.getItem(k),
+  setItem: (k, v) => (localStorage.getItem('pd_rm') === '0' ? sessionStorage : localStorage).setItem(k, v),
+  removeItem: k => { localStorage.removeItem(k); sessionStorage.removeItem(k); }
+};
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth: { storage: store, persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+});
+
+let me = null, prof = null, toastT;
+function toast(m, t = 'ok') { const e = $('toast'); e.textContent = m; e.className = t; clearTimeout(toastT); toastT = setTimeout(() => e.classList.add('hidden'), 4500); }
+function ferr(id, msg) { const e = $(id + '-e'); if (e) e.textContent = msg || ''; $(id)?.classList.toggle('bad', !!msg); return !msg; }
+function busy(b, on, txt) { b.disabled = on; if (on) { b.dataset.t = b.textContent; b.textContent = txt; } else b.textContent = b.dataset.t || b.textContent; }
+const authMsg = e => {
+  const m = (e?.message || '').toLowerCase();
+  if (m.includes('invalid login')) return 'Email/username atau password salah.';
+  if (m.includes('already registered') || m.includes('already been registered')) return 'Email sudah terdaftar. Silakan login.';
+  if (m.includes('email not confirmed')) return 'Email belum dikonfirmasi. Cek kotak masuk Anda.';
+  if (m.includes('rate limit')) return 'Terlalu banyak percobaan. Coba lagi beberapa menit lagi.';
+  if (m.includes('same password')) return 'Password baru harus berbeda dari yang lama.';
+  return e?.message || 'Terjadi kesalahan. Coba lagi.';
+};
+const pwOk = p => p.length >= 8 && /[A-Za-z]/.test(p) && /\d/.test(p);
+
+// Tampilkan/sembunyikan password
+document.addEventListener('click', e => {
+  const eye = e.target.closest('[data-eye]');
+  if (eye) { const i = $(eye.dataset.eye); const h = i.type === 'password'; i.type = h ? 'text' : 'password'; eye.textContent = h ? 'Sembunyikan' : 'Tampilkan'; }
+  const go = e.target.closest('[data-go]'); if (go) showForm(go.dataset.go);
+});
+function showForm(n) { ['login', 'reg', 'forgot', 'reset'].forEach(f => $('f-' + f).classList.add('hidden')); $('f-' + (n === 'register' ? 'reg' : n)).classList.remove('hidden'); }
+function showAuth(form = 'login') { $('app').classList.add('hidden'); $('auth').classList.remove('hidden'); showForm(form); }
+
+// ---------- Login ----------
+$('f-login').addEventListener('submit', async e => {
+  e.preventDefault();
+  const id = $('l-id').value.trim(), pw = $('l-pw').value;
+  const a = ferr('l-id', id ? '' : 'Isi email atau username.'), b = ferr('l-pw', pw ? '' : 'Isi password.');
+  if (!a || !b) return;
+  const btn = $('l-btn'); busy(btn, true, 'Memproses…');
+  localStorage.setItem('pd_rm', $('l-rm').checked ? '1' : '0');
+  try {
+    let email = id;
+    if (!id.includes('@')) {
+      const { data, error } = await sb.rpc('email_for_login', { p_username: id });
+      if (error || !data) throw { message: 'Invalid login credentials' };
+      email = data;
+    }
+    const { error } = await sb.auth.signInWithPassword({ email, password: pw });
+    if (error) throw error;
+    await enterApp();
+  } catch (err) { toast(authMsg(err), 'err'); }
+  busy(btn, false);
+});
+
+// ---------- Registrasi ----------
+$('f-reg').addEventListener('submit', async e => {
+  e.preventDefault();
+  const v = { name: $('r-name').value.trim(), email: $('r-email').value.trim(), user: $('r-user').value.trim(), pw: $('r-pw').value, pw2: $('r-pw2').value, farm: $('r-farm').value.trim(), loc: $('r-loc').value.trim() };
+  let ok = true;
+  ok &= ferr('r-name', v.name.length >= 3 ? '' : 'Minimal 3 karakter.');
+  ok &= ferr('r-email', /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.email) ? '' : 'Format email tidak valid.');
+  ok &= ferr('r-user', /^[A-Za-z0-9_]{3,20}$/.test(v.user) ? '' : '3–20 karakter: huruf, angka, garis bawah.');
+  ok &= ferr('r-pw', pwOk(v.pw) ? '' : 'Minimal 8 karakter, huruf dan angka.');
+  ok &= ferr('r-pw2', v.pw === v.pw2 ? '' : 'Konfirmasi tidak sama.');
+  ok &= ferr('r-loc', v.loc ? '' : 'Isi lokasi pertanian.');
+  if (!ok) return;
+  const btn = $('r-btn'); busy(btn, true, 'Mendaftarkan…');
+  try {
+    const { data: free } = await sb.rpc('username_available', { p_username: v.user });
+    if (free === false) { ferr('r-user', 'Username sudah dipakai.'); busy(btn, false); return; }
+    localStorage.setItem('pd_rm', '1');
+    const { data, error } = await sb.auth.signUp({ email: v.email, password: v.pw,
+      options: { data: { full_name: v.name, username: v.user, farm_name: v.farm, farm_location: v.loc }, emailRedirectTo: location.href.split('#')[0] } });
+    if (error) throw error;
+    if (data.session) { toast('Registrasi berhasil. Selamat datang di PARDISE!'); await enterApp(); }
+    else { toast('Registrasi berhasil. Cek email Anda untuk konfirmasi, lalu login.'); $('f-reg').reset(); showForm('login'); }
+  } catch (err) { toast('Registrasi gagal: ' + authMsg(err), 'err'); }
+  busy(btn, false);
+});
+
+// ---------- Lupa & reset password ----------
+$('f-forgot').addEventListener('submit', async e => {
+  e.preventDefault(); const em = $('f-email').value.trim();
+  if (!ferr('f-email', /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em) ? '' : 'Format email tidak valid.')) return;
+  const btn = $('f-btn'); busy(btn, true, 'Mengirim…');
+  const { error } = await sb.auth.resetPasswordForEmail(em, { redirectTo: location.href.split('#')[0] });
+  busy(btn, false);
+  error ? toast(authMsg(error), 'err') : toast('Jika email terdaftar, tautan reset sudah dikirim.');
+});
+$('f-reset').addEventListener('submit', async e => {
+  e.preventDefault(); const p = $('n-pw').value;
+  if (!pwOk(p)) return $('n-e').textContent = 'Minimal 8 karakter, huruf dan angka.';
+  if (p !== $('n-pw2').value) return $('n-e').textContent = 'Konfirmasi tidak sama.';
+  $('n-e').textContent = ''; const btn = $('n-btn'); busy(btn, true, 'Menyimpan…');
+  const { error } = await sb.auth.updateUser({ password: p });
+  busy(btn, false);
+  if (error) return toast(authMsg(error), 'err');
+  toast('Password berhasil diubah.'); await enterApp();
+});
+
+// ---------- Masuk ke aplikasi ----------
+async function enterApp() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) return showAuth();
+  me = session.user;
+  const { data, error } = await sb.from('profiles').select('*').eq('id', me.id).single();
+  if (error || !data) { await sb.auth.signOut(); toast('Profil tidak ditemukan. Hubungi administrator.', 'err'); return showAuth(); }
+  if (!data.is_active) { await sb.auth.signOut(); toast('Akun Anda dinonaktifkan. Hubungi administrator.', 'err'); return showAuth(); }
+  prof = data; renderShell();
+  $('auth').classList.add('hidden'); $('app').classList.remove('hidden'); page('dash');
+}
+const MODS = [['Data lahan', 'Tambah dan kelola lahan Anda.'], ['Siklus produksi', 'Pantau tanam hingga panen.'], ['RAB', 'Rencana anggaran biaya per musim.'], ['Hama & penyakit', 'Catat serangan di lahan.'], ['Forecasting panen', 'Perkiraan hasil panen.'], ['Laporan', 'Lihat dan unduh laporan Anda.']];
+const MODS_ADMIN = [['Database komoditas', 'Kelola master data komoditas.'], ['Database hama & penyakit', 'Kelola master data hama dan penyakit.'], ['Pengaturan sistem', 'Atur konfigurasi website.']];
+function avatar(el, p) { el.innerHTML = p.avatar_url ? `<img src="${esc(p.avatar_url)}" alt="">` : esc((p.full_name || '?').trim()[0].toUpperCase()); }
+function renderShell() {
+  const adm = prof.role === 'admin';
+  $('top-name').textContent = prof.full_name; $('top-role').textContent = adm ? 'Administrator' : 'Petani';
+  avatar($('top-av'), prof); avatar($('p-av'), prof);
+  $('hello').textContent = 'Halo, ' + prof.full_name.split(' ')[0];
+  $('admin-nav').classList.toggle('hidden', !adm);
+  $('mods').innerHTML = (adm ? MODS.concat(MODS_ADMIN) : MODS).map(m => `<div class="mod"><h3>${m[0]}</h3><p>${m[1]}</p></div>`).join('');
+  $('p-name').value = prof.full_name; $('p-user').value = prof.username; $('p-email').value = me.email;
+  $('p-phone').value = prof.phone || ''; $('p-farm').value = prof.farm_name || ''; $('p-loc').value = prof.farm_location || '';
+}
+function page(n) {
+  if (n === 'users' && prof?.role !== 'admin') n = 'dash';
+  ['dash', 'profile', 'users'].forEach(p => $('p-' + p).classList.toggle('hidden', p !== n));
+  document.querySelectorAll('#nav [data-page]').forEach(b => b.classList.toggle('on', b.dataset.page === n));
+  if (n === 'users') loadUsers();
+}
+$('nav').addEventListener('click', e => { const b = e.target.closest('[data-page]'); if (b) page(b.dataset.page); });
+$('logout').onclick = async () => { await sb.auth.signOut(); me = prof = null; toast('Anda sudah logout.'); showAuth(); };
+
+// ---------- Profil ----------
+$('f-prof').addEventListener('submit', async e => {
+  e.preventDefault();
+  const name = $('p-name').value.trim(), user = $('p-user').value.trim(), email = $('p-email').value.trim();
+  if (name.length < 3) return $('p-e').textContent = 'Nama minimal 3 karakter.';
+  if (!/^[A-Za-z0-9_]{3,20}$/.test(user)) return $('p-e').textContent = 'Username 3–20 karakter: huruf, angka, garis bawah.';
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return $('p-e').textContent = 'Format email tidak valid.';
+  $('p-e').textContent = ''; const btn = $('p-btn'); busy(btn, true, 'Menyimpan…');
+  const upd = { full_name: name, username: user, phone: $('p-phone').value.trim() || null, farm_name: $('p-farm').value.trim() || null, farm_location: $('p-loc').value.trim() || null };
+  const { error } = await sb.from('profiles').update(upd).eq('id', me.id);
+  if (error) { busy(btn, false); return toast(error.code === '23505' ? 'Username sudah dipakai.' : 'Gagal menyimpan: ' + error.message, 'err'); }
+  let msg = 'Profil berhasil disimpan.';
+  if (email !== me.email) { const r = await sb.auth.updateUser({ email }); if (r.error) msg = 'Profil tersimpan, tetapi email gagal diubah: ' + authMsg(r.error); else msg = 'Profil tersimpan. Konfirmasi perubahan email lewat tautan yang dikirim.'; }
+  Object.assign(prof, upd); renderShell(); busy(btn, false); toast(msg);
+});
+$('av-btn').onclick = () => $('av-file').click();
+$('av-file').onchange = async e => {
+  const f = e.target.files[0]; if (!f) return;
+  if (!/^image\/(png|jpeg|webp)$/.test(f.type) || f.size > 2 * 1024 * 1024) return toast('Foto harus JPG/PNG/WebP, maksimal 2 MB.', 'err');
+  const path = me.id + '/avatar';
+  const { error } = await sb.storage.from('avatars').upload(path, f, { upsert: true, contentType: f.type });
+  if (error) return toast('Upload gagal: ' + error.message, 'err');
+  const url = sb.storage.from('avatars').getPublicUrl(path).data.publicUrl + '?t=' + Date.now();
+  const r = await sb.from('profiles').update({ avatar_url: url }).eq('id', me.id);
+  if (r.error) return toast(r.error.message, 'err');
+  prof.avatar_url = url; renderShell(); toast('Foto profil diperbarui.');
+};
+$('f-pw').addEventListener('submit', async e => {
+  e.preventDefault(); const p = $('c-pw').value;
+  if (!pwOk(p)) return $('c-e').textContent = 'Minimal 8 karakter, huruf dan angka.';
+  if (p !== $('c-pw2').value) return $('c-e').textContent = 'Konfirmasi tidak sama.';
+  $('c-e').textContent = ''; const btn = $('c-btn'); busy(btn, true, 'Menyimpan…');
+  const { error } = await sb.auth.updateUser({ password: p });
+  busy(btn, false);
+  if (error) return toast(authMsg(error), 'err');
+  $('f-pw').reset(); toast('Password berhasil diubah.');
+});
+
+// ---------- Admin: kelola akun ----------
+async function loadUsers() {
+  const { data, error } = await sb.from('profiles').select('id,full_name,username,farm_location,role,is_active').order('created_at', { ascending: false });
+  if (error) return toast('Gagal memuat akun: ' + error.message, 'err');
+  $('u-body').innerHTML = data.map(u => `<tr><td>${esc(u.full_name)}</td><td>${esc(u.username)}</td><td>${esc(u.farm_location || '-')}</td>
+    <td><select data-uid="${u.id}" data-f="role" ${u.id === me.id ? 'disabled' : ''}><option value="user" ${u.role === 'user' ? 'selected' : ''}>Petani</option><option value="admin" ${u.role === 'admin' ? 'selected' : ''}>Administrator</option></select></td>
+    <td><select data-uid="${u.id}" data-f="is_active" ${u.id === me.id ? 'disabled' : ''}><option value="true" ${u.is_active ? 'selected' : ''}>Aktif</option><option value="false" ${!u.is_active ? 'selected' : ''}>Nonaktif</option></select></td></tr>`).join('');
+}
+$('u-body').addEventListener('change', async e => {
+  const s = e.target.closest('select'); if (!s) return;
+  const val = s.dataset.f === 'is_active' ? s.value === 'true' : s.value;
+  const { error } = await sb.from('profiles').update({ [s.dataset.f]: val }).eq('id', s.dataset.uid);
+  error ? toast('Gagal: ' + error.message, 'err') : toast('Perubahan akun tersimpan.');
+});
+
+// ---------- Boot & sesi ----------
+sb.auth.onAuthStateChange((ev) => {
+  if (ev === 'PASSWORD_RECOVERY') showAuth('reset');
+  else if (ev === 'SIGNED_OUT') { me = prof = null; showAuth(); }
+});
+(async () => {
+  const { data: { session } } = await sb.auth.getSession();
+  if (location.hash.includes('type=recovery')) return showAuth('reset');
+  session ? enterApp() : showAuth();   // tanpa login selalu diarahkan ke halaman login
+})();
+</script>
+</body>
+</html>
